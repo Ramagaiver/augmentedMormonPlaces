@@ -43,7 +43,7 @@ function loadData(){
     const geojsonData = [
     'data/Natives1870.geojson',
     'data/StateOutlines.geojson',
-    'data/MormonSettlements.geojson'
+    'data/MormonSettlements.geojson' // This data was used with permission of Brandon Plewe, 2025
     ];  
 
     for (path of geojsonData){
@@ -72,6 +72,5 @@ function loadData(){
                     }).addTo(map)} )
     }
 }
-
 
 document.addEventListener('DOMContentLoaded',createMap)
