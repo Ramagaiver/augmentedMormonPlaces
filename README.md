@@ -1,8 +1,6 @@
 # Unit 2
-## 19/2/2026
-Created for Unit 2
-Activity 5 completed 19/2/2026
-Activity 6 completed 27/2/2026
+Activity 5 - 19/2/2026
+Activity 6 - 27/2/2026
 
 To do:
 - [x] Implement StateOutlines and Natives1870 geojsons - Completed 20/2/2026
