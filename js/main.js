@@ -1,10 +1,17 @@
+// Global variable that holds directories for all datasets
+const geojsonData = [
+'data/Natives1870.geojson',
+'data/AdjustedMormonSettlements.geojson', // This data was used with permission of Brandon Plewe, 2025
+'data/StateOutlines.geojson'
+];  
+
 // Global map variable
 var map;
 
 function createMap(){
     // Creates the map
     map = L.map('map', {
-        center: [39.328, -111.674],
+        center: [39.5, -111.674],
         zoom: 7,
         minZoom: 7,
         maxBounds: ([
@@ -38,15 +45,7 @@ function onEachFeature(feature, layer){
 
 // Function that handles fetching and loading all necessary data
 function loadData(){
-
-    // Variable that holds directory of all datasets
-    const geojsonData = [
-    'data/Natives1870.geojson',
-    'data/StateOutlines.geojson',
-    'data/AdjustedMormonSettlements.geojson' // This data was used with permission of Brandon Plewe, 2025
-    ];  
-
-    for (path of geojsonData){
+    for (let path of geojsonData){
         console.log("Fetching " + path)
         fetch(path)
             .then(function(response){
@@ -56,6 +55,14 @@ function loadData(){
 
             .then(function(json){
                     L.geoJson(json, {
+                        filter: function(feature){
+                            if (feature.properties.id === 1){
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        },
+
                         pointToLayer: function(feature, latlng){
                             if (feature.properties.periodized === true){
                                 return L.circleMarker(latlng, definitiveSettlement);
@@ -63,6 +70,13 @@ function loadData(){
                                 return L.circleMarker(latlng, approximateSettlement);
                             }
                         },
+
+                        style: function(feature){
+                            if (path === 'data/StateOutlines.geojson'){
+                                return otherStates;
+                            } 
+                        },
+
                         onEachFeature: onEachFeature
                     }).addTo(map)} )
     }

@@ -1,3 +1,5 @@
+// This file is for housing leaflet style properties
+
 const definitiveSettlement = {
     radius: 8,
     fillColor: "#ff7800",
@@ -17,10 +19,9 @@ const approximateSettlement = {
 };
 
 const otherStates = {
-    Color: "#FFFFFF",
-    opacity: 0.8
-}
-
-const utahState = {
-    opacity: 0
+    fillColor: "#FFFFFF",
+    color: "#232323",
+    weight: 1,
+    opacity: 1,
+    fillOpacity: 0.6
 }
