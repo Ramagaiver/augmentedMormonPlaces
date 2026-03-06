@@ -33,13 +33,29 @@
     position: absolute;
     top: 73px;
     left: 10px;
-    width: 900px;
+    width: 60%;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: normal;
     color: #555;
     font-size: 13px;
     margin: 0;
     padding: 0;
+}
+
+/* SETTINGS */
+
+.settings-control {
+    background-color: white; /* Change from red for better visibility */
+    position: absolute;      /* Ensure it stays relative to summary-mapArea */
+    top: 10px;               /* Move it to a corner */
+    right: 10px;
+    width: auto;             /* Let it shrink to fit the content */
+    height: auto;
+    z-index: 1001;           /* Must be higher than 1000 to clear map panes */
+    padding: 10px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    font-family: Arial, sans-serif;
 }
 
 /* SUMMARY MAP */
@@ -73,6 +89,20 @@
     padding: 5px;
 }
 
+#date {
+    background-color: white; /* Change from red for better visibility */
+    position: absolute;      /* Ensure it stays relative to summary-mapArea */
+    left: 10px;               /* Move it to a corner */
+    bottom: 62px;
+    width: auto;             /* Let it shrink to fit the content */
+    height: auto;
+    z-index: 1001;           /* Must be higher than 1000 to clear map panes */
+    padding: 5px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 .sequence-controls {
     margin: 5px;
     width: 30px;
@@ -90,6 +120,10 @@
 
 #sequence-increment {
     width: auto;
+}
+
+#reverse {
+    transform: rotate(180deg);
 }
 
 /* LEGEND */
@@ -133,28 +167,28 @@
     padding: 0;
 }
 
-#date{
+#attribute-text {
     position: absolute;
-    top: 45px;
+    top: 182px;
     left: 10px;
-    color: red;
+    /* background: red; */
 
     font-family: Arial, Helvetica, sans-serif;
-    color: #000; 
-    font-size: 18px;
+    font-weight: normal;
+    color: #555;
+    font-size: 13px;
     margin: 0;
     padding: 0;
 }
 
 #attribute-legend{
     position: absolute;
-    top: 70px;
+    top: 42px;
     left: 10px;
-    /* right: 10px; */
 
     /* background-color: red; */
     width: 335px;
-    height: 150px;
+    height: 130px;
 }
 
 .legend-circle {
@@ -213,6 +247,7 @@
     font-size: 14px;
     -webkit-text-stroke: 3px white;
     paint-order: stroke fill;
+    opacity: 1;
 }
 
 .definitive-settlement {
@@ -241,3 +276,23 @@
 .territory-shoshone-n { fill: #dcb644; stroke: #dcb644; fill-opacity: 0.2; }
 
 .territory-default { fill: #3388ff; stroke: #3388ff; fill-opacity: 0.5; }
+
+/* SETTLEMENT CLUSTER SYMBOLOGY */
+
+.settlement-cluster {
+    background-color: rgba(97, 165, 245, 1); /* Blueish tint like your legend */
+    border: 2px solid #325780;
+    border-radius: 50%; /* Keeps it a circle */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* The text showing the count inside the cluster */
+.settlement-cluster span {
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: bold;
+    font-size: 11px;
+    color: #fff;
+    text-shadow: 0 0 2px #000;
+}

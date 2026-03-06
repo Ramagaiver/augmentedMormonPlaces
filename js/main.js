@@ -5,6 +5,8 @@ const geojsonData = [
 'data/studyArea.geojson'
 ];  
 
+var proportionalSymbols = true
+
 // Global variable for settlement data
 var mormonSettlementData;
 
@@ -17,6 +19,7 @@ function createMap(){
         center: [39.5, -111.674],
         zoom: 7,
         minZoom: 7,
+        maxZoom: 11,
         maxBounds: ([
             [44.001, -116.043],
             [35.001, -107.047],
@@ -30,16 +33,35 @@ function createMap(){
 
     // Initializes the tile layer
     L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}.png', {
-        // Add the proper ESRI/ARCGIS attribution here //
-        // attribution: '&copy; <a href="ATTRIBUTION LINK HERE">ESRI</a>'
-        attribution: 'ESRI'
-        // Add the proper ESRI/ARCGIS attribution here //
+        attribution: '&copy; <a href="https://www.arcgis.com/home/item.html?id=1b243539f4514b6ba35e7d995890db1d">ESRI</a> | ' 
+                    + '&copy; <a href="https://mormonplaces.byu.edu/">Brandon Plewe</a>'
     }).addTo(map);
-    
+
     // Map panes for z index
     map.createPane('labels');
     map.getPane('labels').style.zIndex = 650;
     map.getPane('labels').style.pointerEvents = 'none';
+
+    // Handles map zoom events
+    map.on('zoomend', function() {
+        console.log(map.getZoom())
+        let currentZoom = map.getZoom()
+        let labels = document.querySelectorAll('.my-polygon-label');
+
+        labels.forEach(function(label){
+            if (currentZoom === 8) {
+                label.style.opacity = '0.8'
+            } else if (currentZoom === 9){
+                label.style.opacity = '0.5';
+            } else if (currentZoom === 10){
+                label.style.opacity = '0.2'
+            } else if (currentZoom == 11){
+                label.style.opacity = '0'
+            } else {
+                label.style.opacity = '1'
+            }
+        })
+    });
 
     // Runs the loadData function; responsible for fetching data
     loadData()
@@ -65,7 +87,7 @@ function onEachPolygon(feature, layer){
         layer.bindTooltip(`${feature.properties.Band}`, {
             permanent: true,
             direction: "center",
-            className: "my-polygon-label", // Optional: for custom CSS styling
+            className: "my-polygon-label",
             offset: [0, 0],
             pane: "labels"
         })
@@ -82,7 +104,7 @@ function createPopupContent(feature, layer){
 
                 var startDate = feature.properties["start date"]
                 var endDate = feature.properties["end date"]
-                let yearRange = Number(startDate.slice(0, 4) - endDate.slice(0, 4))
+                let yearRange = Number(endDate.slice(0, 4) - startDate.slice(0, 4))
 
                 if (feature.properties.periodized === true){
                     popupContent += "<p><h2>" + feature.properties.settlement + "</h2>" + 
@@ -93,7 +115,7 @@ function createPopupContent(feature, layer){
 
                 else {
                     popupContent += "<p><h2>" + feature.properties.settlement + "</h2>" + 
-                    `Approximately established between ${startDate} and ${endDate}` + 
+                    `Established some time between ${startDate} and ${endDate}` + 
                     "<br><br>" + feature.properties.description + "<br><br>" + feature.properties.source + "</p>"
                 }
 
@@ -214,6 +236,50 @@ function sequenceControls(){
         calculateStats(currentDate)
     }
 
+    // Previous year button
+    document.querySelector('#reverse').onclick = function(){
+        let index = parseInt(slider.value);
+        if (index > 1) {
+            index = leapYearHandler(stepType, index, -1)
+            slider.value = index;
+
+            // This calls updateSettlementSymbols every time the button is pressed
+            slider.dispatchEvent(new Event('input'));
+        }
+    };
+
+    // Play and pause sequence button
+    let playSequence = null
+    const playIcon = document.querySelector('#start-stop img');
+
+    document.querySelector('#start-stop').onclick = function(){
+        if (playSequence === null){
+            playIcon.src = 'img/pause.svg';
+            this.title = 'Pause';
+
+            playSequence = setInterval(function(){
+                let index = parseInt(slider.value);
+                if (index < 19358){
+                    index = leapYearHandler(stepType, index, 1)
+                    slider.value = index;
+                    slider.dispatchEvent(new Event('input'));
+                } else {
+                    clearInterval(playSequence);
+                    playSequence = null;
+                            
+                    playIcon.src = 'img/play.svg';
+                    this.title = 'Play';
+                }
+            }, 500);
+        } else {
+            clearInterval(playSequence);
+            playSequence = null;
+
+            playIcon.src = 'img/play.svg';
+            this.title = 'Play';
+        }
+    }
+
     // Next year button
     document.querySelector('#forward').onclick = function(){
         let index = parseInt(slider.value);
@@ -226,17 +292,6 @@ function sequenceControls(){
         }
     };
 
-    // Previous year button
-    document.querySelector('#reverse').onclick = function(){
-        let index = parseInt(slider.value);
-        if (index > 1) {
-            index = leapYearHandler(stepType, index, -1)
-            slider.value = index;
-
-            // This calls updateSettlementSymbols every time the button is pressed
-            slider.dispatchEvent(new Event('input'));
-        }
-    };
 }
 
 function leapYearHandler(stepType, index, direction){
@@ -262,7 +317,6 @@ function leapYearHandler(stepType, index, direction){
 };
 
 // This variable allows switching between proportional and static symbologies
-var propContinuity = true
 
 // This handles updating all the symbols: spatiotemporal & proportional 
 function updateSettlementSymbols(currentDate){
@@ -274,8 +328,8 @@ function updateSettlementSymbols(currentDate){
         if (currentDate >= startDate && currentDate <= endDate){
             let iconPath = 'img/mormon_settlement.svg'
 
-            // If propContinuity is true, then all symbols will change size proportionally with respect to their continuous age
-            if (propContinuity === true){
+            // If proportionalSymbols is true, then all symbols will change size proportional with respect to their continuous age
+            if (proportionalSymbols === true){
                 let ageInDays = (currentDate - startDate) / (1000 * 60 * 60 * 24);
                 let ageInYears = ageInDays / 365;
                 let radius = ageInYears * 0.4;
