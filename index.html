@@ -3,7 +3,7 @@
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width">
-        <title>Mormon Places and the Natives: Settlement of Utah, 1847-1900</title>
+        <title>Mormon Density Isoline </title>
         <meta author="Chanodom Tannarat">
 
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
@@ -15,10 +15,10 @@
 
     <body>
         <main class="container">
-            <div id="logo">Placeholder</div>
-            <h1 id="title">Mormon Site Catchment and Native Dispossession: Utah, 1847-1900</h1>
-            <div id="email">Placeholder</div>
-            <h2 id="sub-title">This project utilizes data from MormonPlaces, a comprehensive database of historical locations derived from Mapping Mormonism. Explore the development of Mormon settlements and their geographic relationship with Indigenous tribal lands from 1847 to 1900.</h2>
+            <!-- <img src="img/utah_flag.svg" id="logo"> -->
+            <h1 id="title">Mormon and Native Territoriality: Settlement of Utah, 1847-1900</h1>
+            <div id="email">Any questions or requests for data?<br><i>HypotheticalInterName@gmail.com</i></div>
+            <h2 id="sub-title">Browse geographic data from the MormonPlaces database, based on periodized settlement records from 1847 to 1900. Kernel density isolines surrounding Mormon settlements act as a base for future investigation into Mormon interactions with Native bands. However, because these boundaries are derived from density analysis and historical spatial modeling, they are subject to interpretive variance, particularly in regions with sparse documentation or transient site occupation, and are best regarded as hypothetical estimates of territorial extent. By applying these quantitative models to known Mormon settlements, the map compares the expansion of Mormon territory with respect to the Native lands that were dispossessed. Native territories are defined by historical and ethnographic literature as they are described in the mid-19th century, providing a spatial baseline for the scale of Mormon growth.</h2>
             <div id="summary-mapArea">
                 <div id="map"></div>
                 <div class="sequence-controller" id="sequence-control-container">
@@ -35,7 +35,7 @@
                     </select>
                 </div>
 
-                <button type="button" id="legend-button">></button>
+                <button type="button" id="legend-button">x</button>
 
                 <div class="legend" id="legend-container">
                     <p id="legend-title">Legend</p>
@@ -68,7 +68,7 @@
                     </div>
                     <div id="native-symbol-elements">
                         <div class="status-item">
-                            <img src="img/natives.svg" class="legend-icon" alt="Native Icon">
+                            <img src="img/site_extent.svg" class="legend-icon" alt="Native Icon">
                             <p class="legend-labels">Site Extent</p>
                         </div>
                         <div class="status-item">
@@ -83,16 +83,30 @@
 
                 <div class="settings-container" id="settings-control">
                     <p id="settings-title">Settings</p>
-                    <label for="cluster-toggle">Clustered Symbols</label>
+                    <label for="cluster-toggle">Aggregate Symbols</label>
                     <input type="checkbox" id="cluster-toggle">
-                    <p class="settings-text">The volume and density of sites in certain areas of Utah can easily become overbearing. Consider enabling clustered symbologies to improve reada- bility at smaller scales.</p>
+                    <p class="settings-text">The volume and density of sites in certain areas of Utah can easily become overbearing. Consider enabling aggregate symbols to improve readability at smaller scales.</p>
                     <label for="cluster-toggle">Proportional Symbols</label>
                     <input type="checkbox" id="proportional-toggle" checked>
                     <p class="settings-text">Proportional site symbols indicate the duration of continuous occupation.</p>
                 </div>
             </div>
-            <div id="credits"></div>
-            <div id="notes"></div>
+            <div id="scroll-indicator">VVVVVVVVVVVVVVVV &nbsp; References &nbsp; VVVVVVVVVVVVVVVV</div>
+            <div id="notes">
+                <h3 style="column-span: all;">References</h3>
+                <div class="citation">Plewe, Brandon. <i>MormonPlaces: A Database of Historic Mormon Settlement.</i> Brigham Young University, retrieved 2025. Used with permission.</div>
+                <div class="citation">Steward, Julian H. “Linguistic Distributions and Political Groups of the Great Basin Shoshoneans.” American Anthropologist 39, no. 4 (1937): 626, fig. 1.</div>
+                <div class="citation">Omer C. Stewart, The Northern Paiute Bands, Anthropological Records 2, no. 3 (1939): map 1.</div>
+                <div class="citation">Yanawant: Paiute Places and Landscapes in the Arizona Strip, vol. 1 of The Arizona Strip Landscapes and Place Name Study (Bureau of Land Management, n.d.), 7.</div>
+                <div class="citation">Virginia McConnell Simmons, The Ute Indians of Utah, Colorado, and New Mexico. Boulder: University Press of Colorado, 2001.</div>
+                <div class="citation">Kelly, Isabel T. “Southern Paiute Bands.” American Anthropologist 36, no. 4 (1934).</div>
+                <div class="citation">Turner, Allen C., and Robert C. Euler. A Brief History of the San Juan Paiute Indians of Northern Arizona. 1983. </div>
+                <div class="citation">Roberts, Robert B. Encyclopedia of Historic Forts: The Military, Pioneer, and Trading Posts of the United States. New York: Macmillan Publishing Company, 1988.</div>
+                <div class="citation">Ruhlen, George. Early Nevada Forts. In: Nevada Historical Society Quarterly, Vol. 7, Centennial No. 3-4, 1964, 1-66.</div>
+                <div class="citation">Jensen, Richard L. Colonization. In: Ludlow, Daniel H (ed.), Encyclopedia of Mormonism (290-294). New York: Macmillan Publishing Company, 1992. https://archive.org/details/encyclopediaofmo01ludl.</div>
+                <div class="citation">Hunter, Milton R. Brigham Young the Colonizer, 4th ed. Salt Lake City: Peresrine Smith. Inc, 1973.</div>
+                <div class="citation">Nakoinz, Oliver. (2010). Concepts of Central Place Research in Archaeology. In: Kiel Graduate School „Human Development in Landscapes” (Hrsg.), Landscapes and Human Development: The Contribution of European Archaeology. (Bonn 2010) 251-264.</div>
+            </div>
         </main>
 
         <script src="https://unpkg.com/@turf/turf@6/turf.min.js"></script>

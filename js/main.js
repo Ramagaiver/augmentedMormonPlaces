@@ -1,7 +1,10 @@
 // Global variable that holds directories for all datasets
 const geojsonData = [
+'data/riverData.geojson',
 'data/baseNatives.geojson',
+'data/lakeData.geojson',
 'data/mormonSettlementsUtah.geojson', // This data was used with permission of Brandon Plewe, 2025
+'data/clippedSettlementDensity_SizedDown.geojson',
 'data/studyArea.geojson'
 ];  
 
@@ -10,8 +13,9 @@ let clusteredSymbols = false
 
 // Global variable for settlement data
 var mormonSettlementData;
-var map;
+var settlementDensityData;
 var clusterGroup;
+var map;
 
 function createMap(){
     // Creates the map
@@ -28,12 +32,13 @@ function createMap(){
     })
 
     L.control.attribution({
-        position: 'topright' // Can be 'topleft', 'topright', 'bottomleft', 'bottomright'
+        position: 'topright'
     }).addTo(map);
 
     // Initializes the tile layer
     L.tileLayer('http://services.arcgisonline.com/arcgis/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}.png', {
-        attribution: '&copy; <a href="https://www.arcgis.com/home/item.html?id=1b243539f4514b6ba35e7d995890db1d">ESRI</a> | ' 
+        attribution: '&copy; <a href="https://www.arcgis.com/home/item.html?id=1b243539f4514b6ba35e7d995890db1d">ESRI</a> | '
+                    + '&copy; <a href="https://www.hydrosheds.org/">HydroSHEDS</a> | '
                     + '&copy; <a href="https://mormonplaces.byu.edu/">Brandon Plewe</a>'
     }).addTo(map);
 
@@ -41,6 +46,12 @@ function createMap(){
     map.createPane('labels');
     map.getPane('labels').style.zIndex = 650;
     map.getPane('labels').style.pointerEvents = 'none';
+
+    map.createPane('lakePane');
+    map.getPane('lakePane').style.zIndex = 360;
+
+    map.createPane('riverPane');
+    map.getPane('riverPane').style.zIndex = 350;
 
     // Handles map zoom events
     map.on('zoomend', function() {
@@ -126,11 +137,10 @@ function createPopupContent(feature, layer){
             
             // Popups for bands
             else if (feature.properties.Band){
-                popupContent += `${feature.properties.Band}`
+                popupContent += `${feature.properties.Band} <br><br> Source: ${feature.properties.source}`
             }
 
             // Popups for everything else
-
             else if (feature.properties.id===0){
                 return;
             }
@@ -156,6 +166,22 @@ function loadData(){
 
             .then(function(json){
                     if (path === 'data/mormonSettlementsUtah.geojson') {
+
+                        // Adds the cluster group to the map
+                        clusterGroup = L.markerClusterGroup({
+                            disableClusteringAtZoom: 9,
+                            spiderfyOnMaxZoom: false,
+                            iconCreateFunction: function(cluster) {
+                                var childCount = cluster.getChildCount();
+                                return new L.DivIcon({ 
+                                    html: '<span>' + childCount + '</span>', 
+                                    className: 'settlement-cluster', 
+                                    iconSize: new L.Point(30, 30) 
+                                });
+                            }
+                        }).addTo(map);
+
+                        // Adds all settlement data
                         mormonSettlementData = L.geoJson(json, {
                             pointToLayer: function(feature, latlng) {
                                 let isPeriodized = feature.properties.periodized === true;
@@ -170,14 +196,18 @@ function loadData(){
                                 });
                             },
                             onEachFeature: onEachFeature
-                        }).addTo(map);
+                        })
 
                         let initialDate = new Date(1900, 0, 0);
-                        sequenceControls();
+                        document.getElementById('date').textContent = initialDate.toDateString();
+                        sequenceControls(initialDate);
                         otherButtons();
                         updateSettlementSymbols(initialDate);
+                        updateSettlementDensity(initialDate);
+                        calculateStats(initialDate);
                     }
 
+                    // Study area/scope
                     else if (path === 'data/studyArea.geojson'){
                         L.geoJSON(json, {
                             filter: function(feature){
@@ -190,20 +220,60 @@ function loadData(){
                         }).addTo(map);
                     }
 
+                    // Handles native bands
                     else if (path === 'data/baseNatives.geojson'){
                         L.geoJson(json, {
                             style: function(feature){
-                                // return nativeStyles[feature.properties.Tribe] || nativeStyles["Default"];
                                 let tribe = feature.properties.Tribe;
                                 let tribeClass = tribe.toLowerCase().replace(/ /g, '-'); 
                                 return { className: `territory territory-${tribeClass}` };
                                 },
-                        onEachFeature: function(feature, layer) {
+                        onEachFeature: function(feature, layer){
                             onEachPolygon(feature, layer);
                             onEachFeature(feature, layer);
                             }
                         }).addTo(map);
                     }
+
+                    // Adds the settlement density
+                    else if (path === 'data/clippedSettlementDensity_SizedDown.geojson'){
+                        settlementDensityData = L.geoJson(json, {
+                            interactive: false,
+                            style: function (feature) {
+                                return {
+                                    color: "#325780",
+                                    weight: 2,
+                                    fillColor: "#6699ff",
+                                    fillOpacity: 0.2,
+                                    opacity: 0.2
+                                };
+                            }
+                        });
+                    }
+
+                    else if (path === 'data/riverData.geojson'){
+                        L.geoJson(json, {
+                            pane: 'riverPane',
+                            style: {
+                                color: "#75aadb",
+                                weight: 1.5,
+                                opacity: 0.8
+                            }
+                        }).addTo(map);
+                    }
+
+                    else if (path === 'data/lakeData.geojson'){
+                        L.geoJson(json, {
+                            pane: 'lakePane',
+                            style: {
+                                fillColor: "#75aadb",
+                                fillOpacity: 1,
+                                stroke: false
+                            }
+                        }).addTo(map);
+                    }
+
+                    // Everything else
                     else {
                         L.geoJson(json, {
                             onEachFeature: onEachFeature
@@ -213,6 +283,7 @@ function loadData(){
     }
 }
 
+// Function for all slider-related processes
 function sequenceControls(){   
     // Slider handler
     const slider = document.querySelector('#range-slider');
@@ -232,9 +303,10 @@ function sequenceControls(){
             legendDate.textContent = currentDate.toDateString(); 
         }
 
-        console.log(currentDate)
+        console.log(currentDate);
         updateSettlementSymbols(currentDate);
-        calculateStats(currentDate)
+        updateSettlementDensity(currentDate);
+        calculateStats(currentDate);
     }
 
     // Previous year button
@@ -295,6 +367,7 @@ function sequenceControls(){
 
 }
 
+// This function handles all date inputs from increment buttons and translates them back for the slider
 function leapYearHandler(stepType, index, direction){
     const baseDate = new Date(1847, 0, 0);
 
@@ -316,8 +389,6 @@ function leapYearHandler(stepType, index, direction){
     let timeDifference = calcDate.getTime() - baseDate.getTime();
     return Math.round(timeDifference / (1000 * 60 * 60 * 24));
 };
-
-// This variable allows switching between proportional and static symbologies
 
 // This handles updating all the symbols: spatiotemporal & proportional 
 function updateSettlementSymbols(currentDate){
@@ -351,25 +422,58 @@ function updateSettlementSymbols(currentDate){
 
                 layer.setIcon(L.icon({
                     iconUrl: iconPath,
-                    iconSize: [10, 10], // Fixed size
+                    iconSize: [10, 10],
                     iconAnchor: [5, 5],
                     className: isPeriodized ? 'definitive-settlement' : 'approximate-settlement'
                 }));
             }
             
-            if (!map.hasLayer(layer)){
-                layer.addTo(map);
+            // Spatiotemporal pruning for the cluster groups
+            if (clusteredSymbols === true) {
+                map.removeLayer(layer);
+                if (!clusterGroup.hasLayer(layer)) {
+                    clusterGroup.addLayer(layer);
+                }
+            } else {
+                clusterGroup.removeLayer(layer);
+                if (!map.hasLayer(layer)) {
+                    map.addLayer(layer);
+                }
             }
-        }
 
-        else {
+        } else {
+            // If out of date range, remove from BOTH
             map.removeLayer(layer);
+            clusterGroup.removeLayer(layer);
         }
-
     })
 }
 
-// Function responsible for calculating statistics in legend
+function updateSettlementDensity(currentDate) {
+    // Prevent errors if the slider moves before the data finishes downloading
+    if (!settlementDensityData) return; 
+
+    settlementDensityData.eachLayer(function(layer) {
+        var props = layer.feature.properties;
+        
+        var startDate = new Date(props["start date"]); 
+        var endDate = new Date(props["end date"]); 
+
+        // If the slider date falls within the polygon's active lifespan
+        if (currentDate >= startDate && currentDate <= endDate) {
+            if (!map.hasLayer(layer)) {
+                map.addLayer(layer);
+            }
+        } else {
+            // Remove the polygon if it is outside the date range
+            if (map.hasLayer(layer)) {
+                map.removeLayer(layer);
+            }
+        }
+    });
+}
+
+// Function responsible for calculating statistics for proportional symbols in the legend
 function calculateStats(currentDate){
     var allAges = []
     var calculatedStats = {};
@@ -377,8 +481,8 @@ function calculateStats(currentDate){
     // If proportionalSymbols is true, then do stat calculations
     if (proportionalSymbols === true){
         mormonSettlementData.eachLayer(function(layer){
-            // Calculate only from periodized localities
-            if (map.hasLayer(layer) && layer.feature.properties.periodized === true){
+            // Calculate only from periodized localities, also account for clustered markers
+            if ((map.hasLayer(layer) || clusterGroup.hasLayer(layer)) && layer.feature.properties.periodized === true){
                 var props = layer.feature.properties
                 var startDate = new Date(props["start date"]);
 
@@ -436,8 +540,21 @@ function calculateStats(currentDate){
 
 // This is the function that handles the settings and legend buttons and related functionality
 function otherButtons(){
+    // Clustered markers
+    document.querySelector('#cluster-toggle').onchange = function(){
+        // Update clusteredSymbols to match checkbox state
+        clusteredSymbols = this.checked;
+
+        // Get current date from slider to refresh marker placement
+        const slider = document.querySelector('#range-slider');
+        let currentDate = new Date(1847, 0, 0);
+        currentDate.setDate(currentDate.getDate() + parseInt(slider.value));
+
+        updateSettlementSymbols(currentDate);
+    };
+
     // Proportional symbols
-    document.querySelector('#proportional-toggle').onchange = function() {
+    document.querySelector('#proportional-toggle').onchange = function(){
         // Update proportionalSymbols to match checkbox state
         proportionalSymbols = this.checked;
 
@@ -468,13 +585,19 @@ function otherButtons(){
 
             legend.style.opacity = "0";
             legend.style.pointerEvents = "none";
-            button.textContent = "<"
+            button.textContent = "i"
+            button.style.width = "30px"
+            button.style.height = "30px"
+            button.style.bottom = "395px";
         } else {
             legendVisible = true
 
             legend.style.opacity = "1";
             legend.style.pointerEvents = "auto";
-            button.textContent = ">"
+            button.textContent = "x"
+            button.style.width = "20px"
+            button.style.height = "20px"
+            button.style.bottom = "405px";
         }
     };
 
@@ -492,9 +615,9 @@ function otherButtons(){
             settings.style.pointerEvents = "auto";
             button.textContent = "x"
 
-            date.style.bottom = "273px"; 
+            date.style.bottom = "250px"; 
 
-            button.style.bottom = "248px";
+            button.style.bottom = "229px";
             button.style.left = "300px";
             button.style.width = "20px";
             button.style.height = "20px";

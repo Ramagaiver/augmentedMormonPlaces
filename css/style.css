@@ -1,10 +1,21 @@
+html, body {
+    height: auto;
+    overflow-y: auto;
+}
+
+* {
+    font-family: Arial, Helvetica, sans-serif;
+}
+
 /* SUMMARY HEADER */
 
 #logo {
-    /* background-color: aqua; */
     position: absolute;
     top: 10px;
     left: 10px;
+
+    width: 100%; 
+    height: 100%;
 }
 
 #title {
@@ -24,16 +35,21 @@
     right: 10px;
     text-align: left;
     vertical-align: top;
-    /* background-color: aqua; */
 
+    font-family: Arial, Helvetica, sans-serif;
+    font-weight: normal;
+    color: #000;
+    font-size: 13px;
+
+    text-align: right; 
+    vertical-align: top;
 }
 
 #sub-title {
-    /* background-color: red; */
     position: absolute;
-    top: 73px;
+    top: 70px;
     left: 10px;
-    width: 60%;
+    width:70%;
     font-family: Arial, Helvetica, sans-serif;
     font-weight: normal;
     color: #555;
@@ -43,15 +59,11 @@
 }
 
 /* SUMMARY MAP */
-/* SUMMARY MAP */
 
 #summary-mapArea {
-    /* background-color: red; */
-    position: absolute;
-    top: 126px;
-    left: 10px;
-    right: 10px;
-    bottom: 42px;
+    position: relative;
+    height: 80vh;
+    margin: 138px 10px 20px 10px;
 }
 
 /* SETTINGS */
@@ -69,6 +81,7 @@
     font-family: Arial, sans-serif;
     opacity: 1;
     border-radius: 4px;
+    font-size: 16px;
 }
 
 #settings-title{
@@ -85,14 +98,12 @@
     color: #555;
     font-size: 13px;
     margin: 0;
-    /* padding: 5px; */
 }
 
 #settings-button {
-    /* background-color: red; */
     position: absolute;
     left: 300px;
-    bottom: 248px;
+    bottom: 229px;
     width: 20px;
     height: 20px;
     z-index: 1010;
@@ -131,7 +142,7 @@
     background-color: white;
     position: absolute;
     left: 10px;
-    bottom: 273px;
+    bottom: 250px;
     width: auto;
     height: auto;
     z-index: 1001;
@@ -168,8 +179,8 @@
 
 #legend-button {
     position: absolute;
-    right: 10px;
-    top: 10px;
+    right: 15px;
+    bottom: 405px;
 
     width: 20px;
     height: 20px;
@@ -180,6 +191,11 @@
 
     text-align: center;
     z-index: 1010;
+
+    line-height: 1;
+    background-color: #fff;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
 }
 
 .legend-control-container {  
@@ -289,8 +305,8 @@
 }
 
 .legend-icon {
-    width: 25px;
-    height: 25px;
+width: 50px; 
+    height: 50px;
 }
 
 .status-item .legend-labels {
@@ -300,19 +316,58 @@
 /* SUMMARY FOOTER */
 
 #map {
-    /* background: red; */
     position: absolute;
     height: 100%;
     width: 100%;
-
 }
 
-#credits {
-    background-color: purple;
+#scroll-indicator {
+    text-align: center;
+    color: #888;
+    font-size: 14px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    margin: 10px 0 0 0;
+    user-select: none;
+    cursor: default;
 }
 
 #notes {
-    background-color: yellow;
+    position: relative;
+    margin: 10px 10px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-top: 1px solid #325780;
+
+    column-width: 350px;
+    column-gap: 30px;
+    column-rule: 1px solid #ddd;
+
+    max-height: 450px; 
+    column-fill: auto; 
+    
+    overflow-x: auto;
+    overflow-y: hidden; 
+}
+
+#notes h3 {
+    font-size: 24px;
+    color: #000;
+    margin: 0 0 15px 0;
+    font-weight: bold;
+}
+
+.citation {
+    display: block;
+    margin-bottom: 15px;
+    font-family: Arial, sans-serif;
+    font-size: 13px;
+    line-height: 1.4;
+    
+    break-inside: avoid; 
+    
+    padding-left: 20px;
+    text-indent: -20px;
 }
 
 /* MAP CLASSES */
@@ -362,13 +417,12 @@
 .settlement-cluster {
     background-color: rgba(97, 165, 245, 1);
     border: 2px solid #325780;
-    border-radius: 50%; /* Keeps it a circle */
+    border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-/* Text showing the count inside cluster */
 .settlement-cluster span {
     font-family: Arial, Helvetica, sans-serif;
     font-weight: bold;
